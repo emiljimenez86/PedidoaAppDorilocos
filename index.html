@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PedidosApp"> 
+   
+    <title>PedidosApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" sizes="192x192" href="./imagen/logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./imagen/logo.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="./imagen/logo.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="./imagen/logo.png">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            background-color: #0a192f !important;
+            color: #ffffff !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            background-color: #0a192f !important;
+            flex: 1;
+        }
+        #productosSeleccionados {
+            color: #000000 !important;
+        }
+        footer {
+            margin-top: auto;
+            background-color: #0a192f;
+        }
+        /* Estilos para el select de productos */
+        .form-select optgroup {
+            background-color: #FFD700;
+            color: #000;
+            font-weight: bold;
+            padding: 5px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .form-select option {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        /* Estilos para nombres largos */
+        .form-select option {
+            white-space: normal !important;
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+        /* Estilos para móvil */
+        @media (max-width: 768px) {
+            .form-select optgroup {
+                font-size: 1.1em;
+                padding: 8px;
+                margin-top: 15px;
+            }
+            .form-select option {
+                font-size: 0.9em;
+                padding: 8px 5px;
+            }
+            .form-select {
+                height: auto;
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="fixed-top d-flex justify-content-end p-3">
+        <button id="installBtn" class="btn btn-success me-2" style="display: none;">Instalar App</button>
+    </div>
+
+    <div id="ios-instructions" style="display: none; text-align: center; background: #ffeb3b; padding: 10px; border-radius: 5px;">
+      📱 Para instalar esta app en iPhone:<br>
+      1️⃣ Toca <strong>Compartir</strong> (📤).<br>
+      2️⃣ Selecciona <strong>"Agregar a inicio"</strong>.<br>
+      3️⃣ Listo <strong>"Así de fácil te llevas nuestro Menú"</strong>.
+    </div>
+    
+    <div class="container mt-4 pt-5">
+        <button class="btn btn-danger btn-sm mb-3" onclick="realizarCierreVentas()">Cierre de Ventas</button>
+        <h2 class="text-center mb-4" style="color: #FFD700;">Tomar Pedido</h2>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="mesa" class="form-label">Seleccionar Mesa:</label>
+                <select id="mesa" class="form-select">
+                    <option value="Mesa 1">Mesa 1</option>
+                    <option value="Mesa 2">Mesa 2</option>
+                    <option value="Mesa 3">Mesa 3</option>
+                    <option value="Mesa 4">Mesa 4</option>
+                    <option value="Mesa 5">Mesa 5</option>
+                    <option value="Mesa 6">Mesa 6</option>
+                    <option value="Mesa 7">Mesa 7</option>
+                    <option value="Mesa 8">Mesa 8</option>
+                    <option value="Mesa 9">Mesa 9</option>
+                    <option value="Mesa 10">Mesa 10</option>
+                    <option value="DOMICILIO">DOMICILIO</option>
+                    <option value="RECOGER">Recoger en el lugar</option>
+                </select>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="producto" class="form-label">Seleccionar Producto:</label>
+                <select id="producto" class="form-select" onchange="mostrarSalsas()">
+                    <option value="">Seleccione un producto...</option>
+                    <!-- Doritos Flamin Hot -->
+                    <optgroup label="DORITOS FLAMIN HOT">
+                        <option value="Dorito flamin Hot">Dorito flamin Hot - $15.000</option>
+                        <option value="Dorito flamin Hot familiar">Dorito flamin Hot familiar - $22.000</option>
+                        <option value="Dorito flamin Hot Familiar +">Dorito flamin Hot Familiar + - $30.000</option>
+                    </optgroup>
+                    <!-- Doritos Mega Queso -->
+                    <optgroup label="DORITOS MEGA QUESO">
+                        <option value="Dorito Mega Queso">Dorito Mega Queso - $15.000</option>
+                        <option value="Dorito Mega Queso familiar">Dorito Mega Queso familiar - $22.000</option>
+                        <option value="Dorito Mega Queso Familiar +">Dorito Mega Queso Familiar + - $30.000</option>
+                    </optgroup>
+                    <!-- Tacos -->
+                    <optgroup label="TACOS">
+                        <option value="Taco">Taco - $5.000</option>
+                        <option value="5 Tacos">5 Tacos - $20.000</option>
+                        <option value="7 Tacos">7 Tacos - $30.000</option>
+                    </optgroup>
+                    <!-- Bebidas y Otros -->
+                    <optgroup label="BEBIDAS Y OTROS">
+                        <option value="Cantaritos">Cantaritos - $15.000</option>
+                        <option value="Esquite 8 onzas">Esquite 8 onzas - $12.000</option>
+                        <option value="Esquite 12 onzas">Esquite 12 onzas - $20.000</option>
+                        <option value="Adicciones">Adicciones - $3.000</option>
+                    </optgroup>
+                </select>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="cantidad" class="form-label">Cantidad:</label>
+                <input type="number" id="cantidad" class="form-control" value="1" min="1">
+            </div>
+            
+            <div id="salsasContainer" class="mt-2" style="display: none;">
+                <label class="form-label">Seleccionar Salsas:</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Todas" id="todasSalsas" onchange="seleccionarTodasSalsas(this)">
+                    <label class="form-check-label" for="todasSalsas">Todas las salsas</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Salsa de la casa" id="salsa1">
+                    <label class="form-check-label" for="salsa1">Salsa de la casa</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Salsa picante" id="salsa2">
+                    <label class="form-check-label" for="salsa2">Salsa picante</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Salsa de ajo" id="salsa3">
+                    <label class="form-check-label" for="salsa3">Salsa de ajo</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Salsa BBQ" id="salsa4">
+                    <label class="form-check-label" for="salsa4">Salsa BBQ</label>
+                </div>
+            </div>
+            
+            <div id="detallesContainer" class="mt-2">
+                <label for="detallesProducto" class="form-label">Detalles Especiales:</label>
+                <input type="text" class="form-control" id="detallesProducto" placeholder="Ej: Sin lechuga, no tan tostada, etc.">
+            </div>
+            
+            <div class="mb-3">
+                <label for="productosSeleccionados" class="form-label">Productos Seleccionados</label>
+                <div id="productosSeleccionados" class="p-3" style="background-color: #f0f8ff; border: 1px solid #b0c4de; border-radius: 8px; min-height: 50px;"></div>
+            </div>
+        </div>
+        
+        <div class="text-center mb-4">
+            <button class="btn btn-success btn-sm me-2" onclick="agregarProducto()">Agregar Producto</button>
+            <button class="btn btn-primary btn-lg" onclick="agregarPedido()">Guardar Pedido</button>
+        </div>
+        
+        <h3 class="mb-3">Pedidos Actuales</h3>
+        <ul id="listaPedidos" class="list-group"></ul>
+    </div>
+    
+    <footer class="text-center py-3 mt-4">
+        <p class="mb-0">&copy;Todos los derechos reservados a <br>Emil Jiménez Ortiz - Desarrollador Web</p>
+    </footer>
+    
+    <script src="script.js"></script>
+</body>
+</html>
