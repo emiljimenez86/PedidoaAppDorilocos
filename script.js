@@ -810,8 +810,10 @@ function generarResumenCierre() {
 
 function realizarCierreVentas() {
     if (confirm("¿Está seguro que desea realizar el cierre de ventas? Esta acción generará un resumen y limpiará todos los pedidos actuales.")) {
-        const ventanaCierre = window.open('', '_blank');
         const contenido = generarResumenCierre();
+        const ventanaCierre = window.open('', '_blank');
+        
+        // Escribir el contenido directamente
         ventanaCierre.document.write(contenido);
         ventanaCierre.document.close();
         
