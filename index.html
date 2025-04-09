@@ -85,7 +85,10 @@
     </div>
     
     <div class="container mt-4 pt-5">
-        <button class="btn btn-danger btn-sm mb-3" onclick="realizarCierreVentas()">Cierre de Ventas</button>
+        <div class="d-flex justify-content-between mb-3">
+            <a href="gastos.html" class="btn btn-warning btn-sm">Gastos</a>
+            <button class="btn btn-danger btn-sm" onclick="realizarCierreVentas()">Cierre de Ventas</button>
+        </div>
         <h2 class="text-center mb-4" style="color: #FFD700;">Tomar Pedido</h2>
         
         <div class="row">
@@ -114,12 +117,14 @@
                     <!-- Doritos Flamin Hot -->
                     <optgroup label="DORITOS FLAMIN HOT">
                         <option value="Dorito flamin Hot">Dorito flamin Hot - $15.000</option>
+                        <option value="2 Doritos flamin Hot">2 Doritos flamin Hot - $25.000</option>
                         <option value="Dorito flamin Hot familiar">Dorito flamin Hot familiar - $22.000</option>
                         <option value="Dorito flamin Hot Familiar +">Dorito flamin Hot Familiar + - $30.000</option>
                     </optgroup>
                     <!-- Doritos Mega Queso -->
                     <optgroup label="DORITOS MEGA QUESO">
                         <option value="Dorito Mega Queso">Dorito Mega Queso - $15.000</option>
+                        <option value="2 Doritos Mega Queso">2 Doritos Mega Queso - $25.000</option>
                         <option value="Dorito Mega Queso familiar">Dorito Mega Queso familiar - $22.000</option>
                         <option value="Dorito Mega Queso Familiar +">Dorito Mega Queso Familiar + - $30.000</option>
                     </optgroup>
@@ -170,7 +175,7 @@
             
             <div id="detallesContainer" class="mt-2">
                 <label for="detallesProducto" class="form-label">Detalles Especiales:</label>
-                <input type="text" class="form-control" id="detallesProducto" placeholder="Ej: Sin lechuga, no tan tostada, etc.">
+                <input type="text" class="form-control" id="detallesProducto" placeholder="Ej: Sin queso, sin pollo, etc.">
             </div>
             
             <div class="mb-3">

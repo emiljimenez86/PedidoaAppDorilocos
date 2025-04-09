@@ -9,11 +9,13 @@ let totalVentas = 0;
 const precios = {
     // Doritos Flamin Hot
     "Dorito flamin Hot": 15000,
+    "2 Doritos flamin Hot": 25000,
     "Dorito flamin Hot familiar": 22000,
     "Dorito flamin Hot Familiar +": 30000,
     
     // Doritos Mega Queso
     "Dorito Mega Queso": 15000,
+    "2 Doritos Mega Queso": 25000,
     "Dorito Mega Queso familiar": 22000,
     "Dorito Mega Queso Familiar +": 30000,
     
@@ -570,6 +572,7 @@ function seleccionarTodasSalsas(checkbox) {
 
 function generarResumenCierre() {
     const pedidos = obtenerPedidos();
+    const gastos = obtenerGastos();
     const fecha = new Date().toLocaleString('es-ES');
     
     const pedidosPendientes = pedidos.filter(p => p.estado === 'Pendiente').length;
@@ -580,6 +583,9 @@ function generarResumenCierre() {
             return pedidoSum + (producto.precio * producto.cantidad);
         }, 0);
     }, 0);
+    
+    const totalGastos = gastos.reduce((sum, gasto) => sum + gasto.monto, 0);
+    const gananciaNeta = totalVentas - totalGastos;
     
     const pedidosPorMesa = {};
     pedidos.forEach(pedido => {
@@ -727,6 +733,31 @@ function generarResumenCierre() {
                 
                 <div class="total-ventas">
                     Total de Ventas: $${totalVentas.toLocaleString()}
+                </div>
+                
+                <h3 style="margin: 5px 0; font-size: 11px;">Gastos</h3>
+                <table class="tabla">
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th>Fecha</th>
+                    </tr>
+                    ${gastos.map(gasto => `
+                        <tr>
+                            <td>${gasto.descripcion}</td>
+                            <td>$${gasto.monto.toLocaleString()}</td>
+                            <td>${gasto.fecha}</td>
+                        </tr>
+                    `).join('')}
+                    <tr>
+                        <td><strong>Total Gastos</strong></td>
+                        <td><strong>$${totalGastos.toLocaleString()}</strong></td>
+                        <td></td>
+                    </tr>
+                </table>
+                
+                <div class="total-ventas" style="background-color: #28a745; color: white;">
+                    Ganancia Neta: $${gananciaNeta.toLocaleString()}
                 </div>
                 
                 <table class="tabla">

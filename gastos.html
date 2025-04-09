@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gastos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #0a192f !important;
+            color: #ffffff !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            background-color: #0a192f !important;
+            flex: 1;
+        }
+        #listaGastos {
+            color: #000000 !important;
+        }
+        .gasto-item {
+            background-color: #f0f8ff;
+            border: 1px solid #b0c4de;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-center" style="color: #FFD700;">Registro de Gastos</h2>
+            <a href="index.html" class="btn btn-primary">Volver a Pedidos</a>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="descripcionGasto" class="form-label">Descripción del Gasto:</label>
+                <input type="text" id="descripcionGasto" class="form-control" placeholder="Ej: Compra de ingredientes">
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="montoGasto" class="form-label">Monto:</label>
+                <input type="number" id="montoGasto" class="form-control" placeholder="Ej: 50000">
+            </div>
+            
+            <div class="col-12 mb-3">
+                <button class="btn btn-success" onclick="agregarGasto()">Agregar Gasto</button>
+            </div>
+        </div>
+        
+        <h3 class="mb-3">Gastos Registrados</h3>
+        <div id="listaGastos" class="list-group"></div>
+    </div>
+    
+    <script>
+        function obtenerGastos() {
+            const gastos = localStorage.getItem('gastos');
+            return gastos ? JSON.parse(gastos) : [];
+        }
+        
+        function guardarGastos(gastos) {
+            localStorage.setItem('gastos', JSON.stringify(gastos));
+        }
+        
+        function agregarGasto() {
+            const descripcion = document.getElementById('descripcionGasto').value;
+            const monto = parseFloat(document.getElementById('montoGasto').value);
+            
+            if (!descripcion || isNaN(monto)) {
+                alert('Por favor, complete todos los campos correctamente');
+                return;
+            }
+            
+            const gastos = obtenerGastos();
+            const nuevoGasto = {
+                id: Date.now(),
+                descripcion: descripcion,
+                monto: monto,
+                fecha: new Date().toLocaleString('es-ES')
+            };
+            
+            gastos.push(nuevoGasto);
+            guardarGastos(gastos);
+            
+            document.getElementById('descripcionGasto').value = '';
+            document.getElementById('montoGasto').value = '';
+            
+            cargarGastos();
+        }
+        
+        function eliminarGasto(id) {
+            if (confirm('¿Está seguro que desea eliminar este gasto?')) {
+                const gastos = obtenerGastos();
+                const gastosActualizados = gastos.filter(gasto => gasto.id !== id);
+                guardarGastos(gastosActualizados);
+                cargarGastos();
+            }
+        }
+        
+        function cargarGastos() {
+            const listaGastos = document.getElementById('listaGastos');
+            const gastos = obtenerGastos();
+            
+            listaGastos.innerHTML = '';
+            
+            gastos.forEach(gasto => {
+                const div = document.createElement('div');
+                div.className = 'gasto-item';
+                div.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${gasto.descripcion}</strong><br>
+                            <small>${gasto.fecha}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-danger">$${gasto.monto.toLocaleString()}</span>
+                            <button class="btn btn-danger btn-sm ms-2" onclick="eliminarGasto(${gasto.id})">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+                listaGastos.appendChild(div);
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', cargarGastos);
+    </script>
+</body>
+</html> 
