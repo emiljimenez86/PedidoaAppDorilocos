@@ -571,257 +571,268 @@ function seleccionarTodasSalsas(checkbox) {
 }
 
 function generarResumenCierre() {
-    const pedidos = obtenerPedidos();
-    const gastos = obtenerGastos();
-    const fecha = new Date().toLocaleString('es-ES');
-    
-    const pedidosPendientes = pedidos.filter(p => p.estado === 'Pendiente').length;
-    const pedidosEntregados = pedidos.filter(p => p.estado === 'Entregado').length;
-    
-    const totalVentas = pedidos.reduce((sum, pedido) => {
-        return sum + pedido.productos.reduce((pedidoSum, producto) => {
-            return pedidoSum + (producto.precio * producto.cantidad);
+    try {
+        const pedidos = obtenerPedidos();
+        const gastos = obtenerGastos();
+        const fecha = new Date().toLocaleString('es-ES');
+        
+        const pedidosPendientes = pedidos.filter(p => p.estado === 'Pendiente').length;
+        const pedidosEntregados = pedidos.filter(p => p.estado === 'Entregado').length;
+        
+        const totalVentas = pedidos.reduce((sum, pedido) => {
+            return sum + pedido.productos.reduce((pedidoSum, producto) => {
+                return pedidoSum + (producto.precio * producto.cantidad);
+            }, 0);
         }, 0);
-    }, 0);
-    
-    const totalGastos = gastos.reduce((sum, gasto) => sum + gasto.monto, 0);
-    const gananciaNeta = totalVentas - totalGastos;
-    
-    const pedidosPorMesa = {};
-    pedidos.forEach(pedido => {
-        pedidosPorMesa[pedido.mesa] = (pedidosPorMesa[pedido.mesa] || 0) + 1;
-    });
-    
-    const contenido = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Resumen de Cierre - ${fecha}</title>
-            <meta charset="UTF-8">
-            <style>
-                @page {
-                    size: A4;
-                    margin: 0.5cm;
-                }
-                body { 
-                    font-family: Arial, sans-serif; 
-                    font-size: 10px;
-                    padding: 5px;
-                    margin: 0;
-                }
-                .header { 
-                    text-align: center; 
-                    margin-bottom: 5px;
-                    padding-bottom: 5px;
-                    border-bottom: 1px solid #000;
-                }
-                .resumen { 
-                    border: 1px solid #000; 
-                    padding: 5px; 
-                    margin: 5px 0;
-                }
-                .footer { 
-                    margin-top: 5px; 
-                    text-align: center;
-                    padding-top: 5px;
-                    border-top: 1px solid #000;
-                }
-                .tabla {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin: 5px 0;
-                    font-size: 9px;
-                }
-                .tabla th, .tabla td {
-                    border: 1px solid #000;
-                    padding: 2px;
-                    text-align: left;
-                }
-                .tabla th {
-                    background-color: #f0f0f0;
-                }
-                .total-ventas {
-                    font-size: 11px;
-                    font-weight: bold;
-                    color: #28a745;
-                    margin: 5px 0;
-                    padding: 5px;
-                    background-color: #f8f9fa;
-                    text-align: center;
-                }
-                .pedido-container {
-                    margin-bottom: 5px;
-                    padding: 3px;
-                    border: 1px solid #ddd;
-                }
-                .tabla-productos {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin: 2px 0;
-                    font-size: 8px;
-                }
-                .tabla-productos th, .tabla-productos td {
-                    border: 1px solid #ddd;
-                    padding: 1px;
-                    text-align: left;
-                }
-                .tabla-productos th {
-                    background-color: #f5f5f5;
-                }
-                .estadisticas {
-                    display: flex;
-                    justify-content: space-between;
-                    margin: 5px 0;
-                }
-                .estadistica-item {
-                    flex: 1;
-                    text-align: center;
-                    padding: 3px;
-                    border: 1px solid #ddd;
-                    margin: 0 2px;
-                }
-                .boton-impresion {
-                    text-align: center;
-                    margin-top: 10px;
-                    padding: 10px;
-                }
-                .boton-impresion button {
-                    padding: 8px 15px;
-                    font-size: 14px;
-                    background-color: #007bff;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                }
-                .boton-impresion button:hover {
-                    background-color: #0056b3;
-                }
-                @media print {
-                    .boton-impresion {
-                        display: none;
+        
+        const totalGastos = gastos.reduce((sum, gasto) => sum + gasto.monto, 0);
+        const gananciaNeta = totalVentas - totalGastos;
+        
+        const pedidosPorMesa = {};
+        pedidos.forEach(pedido => {
+            pedidosPorMesa[pedido.mesa] = (pedidosPorMesa[pedido.mesa] || 0) + 1;
+        });
+        
+        return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Resumen de Cierre - ${fecha}</title>
+                <meta charset="UTF-8">
+                <style>
+                    @page {
+                        size: A4;
+                        margin: 0.5cm;
                     }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2 style="margin: 0; font-size: 14px;">Resumen de Cierre</h2>
-                <p style="margin: 2px 0;">Fecha: ${fecha}</p>
-            </div>
-            <div class="resumen">
-                <div class="estadisticas">
-                    <div class="estadistica-item">
-                        <strong>Total Pedidos:</strong><br>${pedidos.length}
-                    </div>
-                    <div class="estadistica-item">
-                        <strong>Pendientes:</strong><br>${pedidosPendientes}
-                    </div>
-                    <div class="estadistica-item">
-                        <strong>Entregados:</strong><br>${pedidosEntregados}
-                    </div>
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        font-size: 10px;
+                        padding: 5px;
+                        margin: 0;
+                    }
+                    .header { 
+                        text-align: center; 
+                        margin-bottom: 5px;
+                        padding-bottom: 5px;
+                        border-bottom: 1px solid #000;
+                    }
+                    .resumen { 
+                        border: 1px solid #000; 
+                        padding: 5px; 
+                        margin: 5px 0;
+                    }
+                    .footer { 
+                        margin-top: 5px; 
+                        text-align: center;
+                        padding-top: 5px;
+                        border-top: 1px solid #000;
+                    }
+                    .tabla {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 5px 0;
+                        font-size: 9px;
+                    }
+                    .tabla th, .tabla td {
+                        border: 1px solid #000;
+                        padding: 2px;
+                        text-align: left;
+                    }
+                    .tabla th {
+                        background-color: #f0f0f0;
+                    }
+                    .total-ventas {
+                        font-size: 11px;
+                        font-weight: bold;
+                        color: #28a745;
+                        margin: 5px 0;
+                        padding: 5px;
+                        background-color: #f8f9fa;
+                        text-align: center;
+                    }
+                    .pedido-container {
+                        margin-bottom: 5px;
+                        padding: 3px;
+                        border: 1px solid #ddd;
+                    }
+                    .tabla-productos {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 2px 0;
+                        font-size: 8px;
+                    }
+                    .tabla-productos th, .tabla-productos td {
+                        border: 1px solid #ddd;
+                        padding: 1px;
+                        text-align: left;
+                    }
+                    .tabla-productos th {
+                        background-color: #f5f5f5;
+                    }
+                    .estadisticas {
+                        display: flex;
+                        justify-content: space-between;
+                        margin: 5px 0;
+                    }
+                    .estadistica-item {
+                        flex: 1;
+                        text-align: center;
+                        padding: 3px;
+                        border: 1px solid #ddd;
+                        margin: 0 2px;
+                    }
+                    .boton-impresion {
+                        text-align: center;
+                        margin-top: 10px;
+                        padding: 10px;
+                    }
+                    .boton-impresion button {
+                        padding: 8px 15px;
+                        font-size: 14px;
+                        background-color: #007bff;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                    }
+                    .boton-impresion button:hover {
+                        background-color: #0056b3;
+                    }
+                    @media print {
+                        .boton-impresion {
+                            display: none;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2 style="margin: 0; font-size: 14px;">Resumen de Cierre</h2>
+                    <p style="margin: 2px 0;">Fecha: ${fecha}</p>
                 </div>
-                
-                <div class="total-ventas">
-                    Total de Ventas: $${totalVentas.toLocaleString()}
-                </div>
-                
-                <h3 style="margin: 5px 0; font-size: 11px;">Gastos</h3>
-                <table class="tabla">
-                    <tr>
-                        <th>Descripción</th>
-                        <th>Monto</th>
-                        <th>Fecha</th>
-                    </tr>
-                    ${gastos.map(gasto => `
-                        <tr>
-                            <td>${gasto.descripcion}</td>
-                            <td>$${gasto.monto.toLocaleString()}</td>
-                            <td>${gasto.fecha}</td>
-                        </tr>
-                    `).join('')}
-                    <tr>
-                        <td><strong>Total Gastos</strong></td>
-                        <td><strong>$${totalGastos.toLocaleString()}</strong></td>
-                        <td></td>
-                    </tr>
-                </table>
-                
-                <div class="total-ventas" style="background-color: #28a745; color: white;">
-                    Ganancia Neta: $${gananciaNeta.toLocaleString()}
-                </div>
-                
-                <table class="tabla">
-                    <tr>
-                        <th>Mesa</th>
-                        <th>Pedidos</th>
-                    </tr>
-                    ${Object.entries(pedidosPorMesa).map(([mesa, cantidad]) => `
-                        <tr>
-                            <td>${mesa}</td>
-                            <td>${cantidad}</td>
-                        </tr>
-                    `).join('')}
-                </table>
-                
-                <h3 style="margin: 5px 0; font-size: 11px;">Detalle de Pedidos</h3>
-                ${pedidos.map(pedido => {
-                    const totalPedido = pedido.productos.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
-                    return `
-                        <div class="pedido-container">
-                            <p style="margin: 2px 0;"><strong>${pedido.mesa}</strong> | ${pedido.hora} | ${pedido.estado}</p>
-                            <table class="tabla-productos">
-                                <tr>
-                                    <th>Producto</th>
-                                    <th>Cant.</th>
-                                    <th>Total</th>
-                                </tr>
-                                ${pedido.productos.map(p => `
-                                    <tr>
-                                        <td>
-                                            ${p.nombre}
-                                            ${p.salsas && p.salsas.length > 0 ? 
-                                                `<br><small>Salsas: ${p.salsas.join(', ')}</small>` : 
-                                                ''}
-                                            ${p.detalles ? `<br><small>Detalles: ${p.detalles}</small>` : ''}
-                                        </td>
-                                        <td>${p.cantidad}</td>
-                                        <td>$${(p.precio * p.cantidad).toLocaleString()}</td>
-                                    </tr>
-                                `).join('')}
-                            </table>
-                            <p style="text-align: right; margin: 2px 0;"><strong>Total: $${totalPedido.toLocaleString()}</strong></p>
+                <div class="resumen">
+                    <div class="estadisticas">
+                        <div class="estadistica-item">
+                            <strong>Total Pedidos:</strong><br>${pedidos.length}
                         </div>
-                    `;
-                }).join('')}
-            </div>
-            <div class="footer">
-                <p style="margin: 0;">Pedidos App by Emil Jiménez</p>
-            </div>
-            <div class="boton-impresion">
-                <button onclick="window.print()">Imprimir o Guardar como PDF</button>
-            </div>
-        </body>
-        </html>
-    `;
-    
-    return contenido;
+                        <div class="estadistica-item">
+                            <strong>Pendientes:</strong><br>${pedidosPendientes}
+                        </div>
+                        <div class="estadistica-item">
+                            <strong>Entregados:</strong><br>${pedidosEntregados}
+                        </div>
+                    </div>
+                    
+                    <div class="total-ventas">
+                        Total de Ventas: $${totalVentas.toLocaleString()}
+                    </div>
+                    
+                    <h3 style="margin: 5px 0; font-size: 11px;">Gastos</h3>
+                    <table class="tabla">
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Monto</th>
+                            <th>Fecha</th>
+                        </tr>
+                        ${gastos.map(gasto => `
+                            <tr>
+                                <td>${gasto.descripcion}</td>
+                                <td>$${gasto.monto.toLocaleString()}</td>
+                                <td>${gasto.fecha}</td>
+                            </tr>
+                        `).join('')}
+                        <tr>
+                            <td><strong>Total Gastos</strong></td>
+                            <td><strong>$${totalGastos.toLocaleString()}</strong></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                    
+                    <div class="total-ventas" style="background-color: #28a745; color: white;">
+                        Ganancia Neta: $${gananciaNeta.toLocaleString()}
+                    </div>
+                    
+                    <table class="tabla">
+                        <tr>
+                            <th>Mesa</th>
+                            <th>Pedidos</th>
+                        </tr>
+                        ${Object.entries(pedidosPorMesa).map(([mesa, cantidad]) => `
+                            <tr>
+                                <td>${mesa}</td>
+                                <td>${cantidad}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                    
+                    <h3 style="margin: 5px 0; font-size: 11px;">Detalle de Pedidos</h3>
+                    ${pedidos.map(pedido => {
+                        const totalPedido = pedido.productos.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
+                        return `
+                            <div class="pedido-container">
+                                <p style="margin: 2px 0;"><strong>${pedido.mesa}</strong> | ${pedido.hora} | ${pedido.estado}</p>
+                                <table class="tabla-productos">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Cant.</th>
+                                        <th>Total</th>
+                                    </tr>
+                                    ${pedido.productos.map(p => `
+                                        <tr>
+                                            <td>
+                                                ${p.nombre}
+                                                ${p.salsas && p.salsas.length > 0 ? 
+                                                    `<br><small>Salsas: ${p.salsas.join(', ')}</small>` : 
+                                                    ''}
+                                                ${p.detalles ? `<br><small>Detalles: ${p.detalles}</small>` : ''}
+                                            </td>
+                                            <td>${p.cantidad}</td>
+                                            <td>$${(p.precio * p.cantidad).toLocaleString()}</td>
+                                        </tr>
+                                    `).join('')}
+                                </table>
+                                <p style="text-align: right; margin: 2px 0;"><strong>Total: $${totalPedido.toLocaleString()}</strong></p>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                <div class="footer">
+                    <p style="margin: 0;">Pedidos App by Emil Jiménez</p>
+                </div>
+                <div class="boton-impresion">
+                    <button onclick="window.print()">Imprimir o Guardar como PDF</button>
+                </div>
+            </body>
+            </html>
+        `;
+    } catch (error) {
+        console.error("Error al generar el resumen:", error);
+        throw new Error("Error al generar el resumen de cierre");
+    }
 }
 
 function realizarCierreVentas() {
     if (confirm("¿Está seguro que desea realizar el cierre de ventas? Esta acción generará un resumen y limpiará todos los pedidos actuales.")) {
-        const contenido = generarResumenCierre();
-        const ventanaCierre = window.open('', '_blank');
-        
-        // Escribir el contenido directamente
-        ventanaCierre.document.write(contenido);
-        ventanaCierre.document.close();
-        
-        // Limpiar los pedidos después de generar el resumen
-        localStorage.removeItem('pedidos');
-        cargarPedidos();
-        
-        alert("Cierre de ventas realizado correctamente. Se ha generado el resumen y se han limpiado todos los pedidos.");
+        try {
+            const contenido = generarResumenCierre();
+            const ventanaCierre = window.open('', '_blank');
+            
+            if (ventanaCierre) {
+                ventanaCierre.document.write(contenido);
+                ventanaCierre.document.close();
+                
+                // Limpiar los pedidos después de generar el resumen
+                localStorage.removeItem('pedidos');
+                cargarPedidos();
+                
+                alert("Cierre de ventas realizado correctamente. Se ha generado el resumen y se han limpiado todos los pedidos.");
+            } else {
+                alert("No se pudo abrir la ventana de resumen. Por favor, verifica que tu navegador no esté bloqueando las ventanas emergentes.");
+            }
+        } catch (error) {
+            console.error("Error al realizar el cierre de ventas:", error);
+            alert("Ocurrió un error al generar el resumen. Por favor, intenta nuevamente.");
+        }
     }
 }
 
