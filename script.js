@@ -593,9 +593,11 @@ function generarResumenCierre() {
     });
     
     const contenido = `
+        <!DOCTYPE html>
         <html>
         <head>
             <title>Resumen de Cierre - ${fecha}</title>
+            <meta charset="UTF-8">
             <style>
                 @page {
                     size: A4;
@@ -666,9 +668,6 @@ function generarResumenCierre() {
                 .tabla-productos th {
                     background-color: #f5f5f5;
                 }
-                .no-print {
-                    display: none;
-                }
                 .estadisticas {
                     display: flex;
                     justify-content: space-between;
@@ -699,14 +698,6 @@ function generarResumenCierre() {
                     background-color: #0056b3;
                 }
                 @media print {
-                    body {
-                        padding: 0;
-                        margin: 0;
-                    }
-                    .resumen {
-                        border: none;
-                        padding: 0;
-                    }
                     .boton-impresion {
                         display: none;
                     }
@@ -820,9 +811,11 @@ function generarResumenCierre() {
 function realizarCierreVentas() {
     if (confirm("¿Está seguro que desea realizar el cierre de ventas? Esta acción generará un resumen y limpiará todos los pedidos actuales.")) {
         const ventanaCierre = window.open('', '_blank');
-        ventanaCierre.document.write(generarResumenCierre());
+        const contenido = generarResumenCierre();
+        ventanaCierre.document.write(contenido);
         ventanaCierre.document.close();
         
+        // Limpiar los pedidos después de generar el resumen
         localStorage.removeItem('pedidos');
         cargarPedidos();
         
