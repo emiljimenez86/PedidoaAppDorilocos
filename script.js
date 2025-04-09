@@ -62,6 +62,16 @@ function guardarPedidos(pedidos) {
     localStorage.setItem('pedidos', JSON.stringify(pedidos));
 }
 
+function obtenerGastos() {
+    try {
+        const gastosGuardados = localStorage.getItem('gastos');
+        return gastosGuardados ? JSON.parse(gastosGuardados) : [];
+    } catch (error) {
+        console.error("Error al obtener gastos:", error);
+        return [];
+    }
+}
+
 // =============================================
 // FUNCIONES DE GESTIÓN DE PRODUCTOS
 // =============================================
@@ -814,21 +824,199 @@ function generarResumenCierre() {
 function realizarCierreVentas() {
     if (confirm("¿Está seguro que desea realizar el cierre de ventas? Esta acción generará un resumen y limpiará todos los pedidos actuales.")) {
         try {
-            const contenido = generarResumenCierre();
-            const ventanaCierre = window.open('', '_blank');
+            const pedidos = obtenerPedidos();
+            const gastos = obtenerGastos();
+            const fecha = new Date().toLocaleString('es-ES');
             
-            if (ventanaCierre) {
-                ventanaCierre.document.write(contenido);
-                ventanaCierre.document.close();
-                
-                // Limpiar los pedidos después de generar el resumen
-                localStorage.removeItem('pedidos');
-                cargarPedidos();
-                
-                alert("Cierre de ventas realizado correctamente. Se ha generado el resumen y se han limpiado todos los pedidos.");
-            } else {
-                alert("No se pudo abrir la ventana de resumen. Por favor, verifica que tu navegador no esté bloqueando las ventanas emergentes.");
-            }
+            const pedidosPendientes = pedidos.filter(p => p.estado === 'Pendiente').length;
+            const pedidosEntregados = pedidos.filter(p => p.estado === 'Entregado').length;
+            
+            const totalVentas = pedidos.reduce((sum, pedido) => {
+                return sum + pedido.productos.reduce((pedidoSum, producto) => {
+                    return pedidoSum + (producto.precio * producto.cantidad);
+                }, 0);
+            }, 0);
+            
+            const totalGastos = gastos.reduce((sum, gasto) => sum + (gasto.monto || 0), 0);
+            const gananciaNeta = totalVentas - totalGastos;
+            
+            const pedidosPorMesa = {};
+            pedidos.forEach(pedido => {
+                pedidosPorMesa[pedido.mesa] = (pedidosPorMesa[pedido.mesa] || 0) + 1;
+            });
+            
+            // Crear el contenido del resumen
+            const contenido = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Resumen de Cierre - ${fecha}</title>
+                    <meta charset="UTF-8">
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        @page {
+                            size: A4;
+                            margin: 0.5cm;
+                        }
+                        body {
+                            font-family: Arial, sans-serif;
+                            padding: 20px;
+                        }
+                        @media print {
+                            .no-print {
+                                display: none;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="text-center">Resumen de Cierre</h2>
+                                <p class="text-center">Fecha: ${fecha}</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-4">
+                                    <div class="col-md-4">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Total Pedidos</h5>
+                                                <p class="card-text">${pedidos.length}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Pendientes</h5>
+                                                <p class="card-text">${pedidosPendientes}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Entregados</h5>
+                                                <p class="card-text">${pedidosEntregados}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-success text-center">
+                                    <h4>Total de Ventas: $${totalVentas.toLocaleString()}</h4>
+                                </div>
+                                
+                                <h3 class="mt-4">Gastos</h3>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Descripción</th>
+                                            <th>Monto</th>
+                                            <th>Fecha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${gastos.map(gasto => `
+                                            <tr>
+                                                <td>${gasto.descripcion || ''}</td>
+                                                <td>$${(gasto.monto || 0).toLocaleString()}</td>
+                                                <td>${gasto.fecha || ''}</td>
+                                            </tr>
+                                        `).join('')}
+                                        <tr class="table-primary">
+                                            <td><strong>Total Gastos</strong></td>
+                                            <td><strong>$${totalGastos.toLocaleString()}</strong></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <div class="alert alert-success text-center">
+                                    <h4>Ganancia Neta: $${gananciaNeta.toLocaleString()}</h4>
+                                </div>
+                                
+                                <h3 class="mt-4">Pedidos por Mesa</h3>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Mesa</th>
+                                            <th>Pedidos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${Object.entries(pedidosPorMesa).map(([mesa, cantidad]) => `
+                                            <tr>
+                                                <td>${mesa}</td>
+                                                <td>${cantidad}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                                
+                                <h3 class="mt-4">Detalle de Pedidos</h3>
+                                ${pedidos.map(pedido => {
+                                    const totalPedido = pedido.productos.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
+                                    return `
+                                        <div class="card mb-3">
+                                            <div class="card-header">
+                                                <strong>${pedido.mesa}</strong> | ${pedido.hora} | ${pedido.estado}
+                                            </div>
+                                            <div class="card-body">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Producto</th>
+                                                            <th>Cant.</th>
+                                                            <th>Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        ${pedido.productos.map(p => `
+                                                            <tr>
+                                                                <td>
+                                                                    ${p.nombre}
+                                                                    ${p.salsas && p.salsas.length > 0 ? 
+                                                                        `<br><small>Salsas: ${p.salsas.join(', ')}</small>` : 
+                                                                        ''}
+                                                                    ${p.detalles ? `<br><small>Detalles: ${p.detalles}</small>` : ''}
+                                                                </td>
+                                                                <td>${p.cantidad}</td>
+                                                                <td>$${(p.precio * p.cantidad).toLocaleString()}</td>
+                                                            </tr>
+                                                        `).join('')}
+                                                    </tbody>
+                                                </table>
+                                                <div class="text-end">
+                                                    <strong>Total: $${totalPedido.toLocaleString()}</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                            <div class="card-footer text-center">
+                                <p class="mb-0">Pedidos App by Emil Jiménez</p>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3 no-print">
+                            <button onclick="window.print()" class="btn btn-primary">Imprimir o Guardar como PDF</button>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            // Abrir una nueva ventana con el resumen
+            const ventanaCierre = window.open('', '_blank');
+            ventanaCierre.document.write(contenido);
+            ventanaCierre.document.close();
+            
+            // Limpiar los pedidos después de mostrar el resumen
+            localStorage.removeItem('pedidos');
+            
+            alert("Cierre de ventas realizado correctamente. Se ha generado el resumen y se han limpiado todos los pedidos.");
         } catch (error) {
             console.error("Error al realizar el cierre de ventas:", error);
             alert("Ocurrió un error al generar el resumen. Por favor, intenta nuevamente.");
