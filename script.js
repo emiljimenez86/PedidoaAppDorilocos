@@ -28,7 +28,12 @@ const precios = {
     "Cantaritos": 15000,
     "Esquite 8 onzas": 12000,
     "Esquite 12 onzas": 20000,
-    "Adicciones": 3000,
+   "A dicciones": 3000,
+   "Pepsi": 2000,
+   "Manzana Postobón": 2000,
+   "Colombiana": 2000,
+   "Coca cola": 3000,
+   "Coca cola": 5000,
     
     // Domicilio
     "DOMICILIO": 0
